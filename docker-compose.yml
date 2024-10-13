@@ -1,0 +1,31 @@
+# version: "3" # Specifies the version of Docker Compose. Version 3 is commonly used for modern Docker Compose files.
+
+services: # Defines the services (containers) that will be managed by Docker Compose.
+  flask_api: # This is the name of the first service, the Flask API.
+    build: ./flask_api # Tells Docker to build the Flask API from the Dockerfile located in the ./Curr_Rate._Api directory.
+
+    container_name: flask_api # Specifies the name of the container for the Flask API.
+
+    ports: # Defines the port mapping for the Flask API.
+      - "5000:5000" # Maps port 5000 on the host to port 5000 in the container (Flask API).
+
+    networks: # Specifies the network(s) the Flask API container will connect to.
+      - currency-net # Connects the Flask API service to the 'currency-net' network.
+
+  dash_app: # This is the name of the second service, the Dash app.
+    build: ./dash_app # Tells Docker to build the Dash app from the Dockerfile located in the ./dash-app directory.
+
+    container_name: dash_app # Specifies the name of the container for the Dash app.
+
+    ports: # Defines the port mapping for the Dash app.
+      - "8050:8050" # Maps port 8050 on the host to port 8050 in the container (Dash app).
+
+    depends_on: # Indicates that the Dash app depends on the Flask API service.
+      - flask_api # Ensures that the Dash app service only starts after the Flask API service is up.
+
+    networks: # Specifies the network(s) the Dash app container will connect to.
+      - currency-net # Connects the Dash app service to the 'currency-net' network.
+
+networks: # Defines custom Docker networks.
+  currency-net: # Declares a network called 'currency-net' for inter-container communication.
+    driver: bridge # Specifies the network driver as 'bridge', which is the default Docker network driver for container communication.
