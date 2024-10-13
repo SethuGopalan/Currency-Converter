@@ -5,7 +5,9 @@ This project is a Dockerized Currency Converter web application built with **Das
 
 ## Screenshots
 
-![App Screenshot](assets/app_screenshot.png)  # Adjust the path based on where the image is stored
+[Include some screenshots of your app's UI and functionality]
+
+![Placeholder for App Screenshot](path/to/your/screenshot.png)
 
 ## Table of Contents
 - [Project Structure](#project-structure)
