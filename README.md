@@ -24,3 +24,85 @@ This project is a Dockerized Currency Converter web application built with **Das
 │   ├── Dockerfile          # Dockerfile for Dash container
 ├── docker-compose.yml      # Docker Compose configuration
 └── README.md               # This file
+Installation
+Requirements
+Docker
+Docker Compose
+Cloning the Repository
+git clone <repository-url>
+cd currency-converter-app
+Configuration
+Place your assets (like the map background image) in the assets/ folder.
+Ensure the docker-compose.yml and Dockerfiles are correctly set up for both Flask and Dash services.
+Usage
+Running the Application with Docker
+Build and run the containers using Docker Compose:
+docker-compose up --build
+Access the Application:
+
+The Flask API will be accessible at: http://localhost:5000
+The Dash frontend will be accessible at: http://localhost:8050
+Stopping the Application
+To stop the running containers, use:
+docker-compose down
+API Endpoints
+Currency Conversion Endpoint
+Endpoint: /Cur
+Method: GET
+Parameters:
+value1: The amount to be converted (e.g., 100).
+first_cur: The source currency (e.g., USD).
+sec_Cur: The target currency (e.g., EUR).
+Example Request:
+GET http://localhost:5000/Cur?value1=100&first_cur=USD&sec_Cur=EUR
+Example Response:
+{
+  "rate": 85.34
+}
+Docker Setup
+Docker Compose Overview
+This project uses Docker Compose to orchestrate two services:
+
+flask_api: The backend Flask API service that performs the currency conversion.
+dash_app: The frontend Dash app for user interaction.
+docker-compose.yml Configurationversion: "3"
+
+services:
+  flask_api:
+    build: ./flask_api  # Builds the Flask API service
+    container_name: flask_api
+    ports:
+      - "5000:5000"
+    networks:
+      - currency-net
+
+  dash_app:
+    build: ./dash_app  # Builds the Dash frontend
+    container_name: dash_app
+    ports:
+      - "8050:8050"
+    depends_on:
+      - flask_api  # Dash app waits for Flask API to be ready
+    networks:
+      - currency-net
+
+networks:
+  currency-net:
+    driver: bridge
+
+
+
+This `README.md` file includes:
+
+- **Project structure** for easy navigation.
+- **Installation** instructions for getting the app running using Docker.
+- **Usage instructions** for running and stopping the application.
+- A clear explanation of the **API Endpoints** for the Flask API.
+- **Docker Compose** configuration and **Dockerfiles** for each service (Flask and Dash).
+
+Make sure you update the `<repository-url>` to the actual repository URL when sharing this file. Let me know if you need any further adjustments!
+
+
+
+
+
