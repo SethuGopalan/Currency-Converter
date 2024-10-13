@@ -7,7 +7,7 @@ This project is a Dockerized Currency Converter web application built with **Das
 
 [Include some screenshots of your app's UI and functionality]
 
-![Placeholder for App Screenshot](dash_app/assets/Screenshort.jpg)
+![Placeholder for App Screenshot](assets/Screenshort.jpg)
 
 ## Table of Contents
 - [Project Structure](#project-structure)
