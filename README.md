@@ -2,7 +2,7 @@
 # Currency Converter App
 
 This project is a Dockerized Currency Converter web application built with **Dash** for the frontend and a **Flask API** for the backend. The app allows users to input an amount, select two currencies to convert between them, and communicates with a Flask API that handles the conversion using the `currency_converter` library.
-![App Screenshot](assets/app_screenshot.png)
+
 
 ## Table of Contents
 - [Project Structure](#project-structure)
