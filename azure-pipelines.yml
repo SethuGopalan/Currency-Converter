@@ -1,0 +1,68 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  EC2_PUBLIC_IP: ''  # Populated dynamically
+  SSH_USER: 'ec2-user'  # Default Amazon Linux user
+
+steps:
+# Step 1: Install Terraform
+- task: TerraformInstaller@2
+  inputs:
+    terraformVersion: 'latest'
+
+# Step 2: Initialize Terraform
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'aws'
+    command: 'init'
+    backendServiceAWS: 'aws_connect_calculator'  # Ensure this matches your AWS service connection
+
+# Step 3: Validate Terraform Configuration
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'aws'
+    command: 'validate'
+
+# Step 4: Terraform Plan
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'aws'
+    command: 'plan'
+    environmentServiceNameAWS: 'aws_connect_calculator'  # Optional: Specify an environment if needed
+
+# Step 5: Terraform Apply
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'aws'
+    command: 'apply'
+    commandOptions: '-auto-approve'  # Skip manual approval
+- task: InstallSSHKey@0
+  inputs:
+    sshPublicKey: $(SSH_PRIVATE_KEY)
+- script: |
+    ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+    sudo yum update -y
+    sudo yum install -y python3 git
+    git clone https://github.com/your-user/your-dash-app-repo.git /home/ec2-user/dash_app
+    git clone https://github.com/your-user/your-flask-api-repo.git /home/ec2-user/flask_api
+    EOF
+  displayName: "Clone Dash App and Flask API from GitHub"
+
+# Step 5: Install Dependencies and Run Applications
+- script: |
+    ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+    pip3 install -r /home/ec2-user/dash_app/requirements.txt
+    pip3 install -r /home/ec2-user/flask_api/requirements.txt
+    nohup python3 /home/ec2-user/dash_app/app.py > /home/ec2-user/dash_app.log 2>&1 &
+    nohup python3 /home/ec2-user/flask_api/api.py > /home/ec2-user/flask_api.log 2>&1 &
+    EOF
+  displayName: "Install Dependencies and Start Applications"
