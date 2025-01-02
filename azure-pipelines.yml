@@ -12,7 +12,7 @@ pool:
 variables:
   EC2_PUBLIC_IP: ''  # Populated dynamically
   SSH_USER: 'ec2-user'  # Default Amazon Linux user
-  SSH_PRIVATE_KEY: $(mySShPrivateKey)  # Replace with actual variable name
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # Replace with actual variable name
 
 steps:
   # Step 1: Install Terraform (Fully Qualified Name)
