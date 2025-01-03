@@ -1,8 +1,23 @@
 # Specify the provider
-provider "aws" {
-  region = "us-east-1"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "3.76.1"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.0.6"
+    }
+  }
 }
+# Configure the AWS Provider
+provider "aws" {
+  profile = "terraform"
+  region  = "us-east-1"
 
+
+}
 # Import IAM Instance Profile from the IAM Script
 # data "aws_iam_instance_profile" "ec2_instance_profile" {
 #   name = "ec2-instance-profile" # This must match the IAM profile name in iam.tf
