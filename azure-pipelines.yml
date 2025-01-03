@@ -25,6 +25,8 @@ steps:
   - script: |
       echo "Current Working Directory: $(System.DefaultWorkingDirectory)"
       ls -al
+      cd terraform || exit 1
+      ls -al
       displayName: "Debug Working Directory"
 
   # Step 3: Initialize Terraform
