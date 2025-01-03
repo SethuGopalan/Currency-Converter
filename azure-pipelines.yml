@@ -42,13 +42,12 @@ steps:
     displayName: "Terraform Apply"
 
   # Step 6: Install SSH Key
-  - task: InstallSSHKey@0
-    inputs:
-      
-      sshPublicKey: $(SSH_PRIVATE_KEY_Dev)
-      hostName: $(EC2_PUBLIC_IP)
-      userName: $(SSH_USER)
-    displayName: "Install SSH Key"
+  - script: |
+      mkdir -p ~/.ssh
+      echo "$(SSH_PRIVATE_KEY)" > ~/.ssh/id_rsa
+      chmod 600 ~/.ssh/id_rsa
+      ssh -o StrictHostKeyChecking=no $(SSH_USER)@$(EC2_PUBLIC_IP) "echo Connection successful"
+    displayName: "Manually Configure SSH Key"
 
   # Step 7: SSH into EC2 and Clone GitHub Repositories
   - script: |
