@@ -10,9 +10,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  EC2_PUBLIC_IP: $(EC2_PUBLIC_IP)  # Populated dynamically
   SSH_USER: 'ec2-user'  # Default Amazon Linux user
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # Replace with actual variable name
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH key stored as a secret variable in Azure Pipelines
 
 steps:
   # Step 1: Checkout Terraform Scripts from Azure Repos
@@ -20,10 +19,11 @@ steps:
     displayName: "Checkout Terraform Scripts"
 
   # Step 2: Install Terraform
+
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
      terraformVersion: 'latest'
-    
+
   # Step 3: Initialize Terraform
   - script: |
       terraform init
@@ -37,20 +37,19 @@ steps:
   # Step 5: Apply Terraform
   - script: |
       terraform apply -auto-approve tfplan
-      echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$(terraform output -raw ec2_public_ip)"
+      EC2_IP=$(terraform output -raw ec2_public_ip)
+      echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$EC2_IP"
     displayName: "Terraform Apply"
 
   # Step 6: Install SSH Key
   - task: InstallSSHKey@0
     inputs:
       sshPublicKey: $(SSH_PRIVATE_KEY)
-      hostName: $(EC2_PUBLIC_IP)
-      userName: $(SSH_USER)
     displayName: "Install SSH Key"
 
   # Step 7: SSH into EC2 and Clone GitHub Repositories
   - script: |
-      ssh -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+      ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
       sudo yum update -y
       sudo yum install -y python3 git
       git clone https://github.com/your-user/your-dash-app-repo.git /home/ec2-user/dash_app
@@ -60,7 +59,7 @@ steps:
 
   # Step 8: Install Dependencies and Run Applications
   - script: |
-      ssh -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+      ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
       pip3 install -r /home/ec2-user/dash_app/requirements.txt
       pip3 install -r /home/ec2-user/flask_api/requirements.txt
       nohup python3 /home/ec2-user/dash_app/app.py > /home/ec2-user/dash_app.log 2>&1 &
