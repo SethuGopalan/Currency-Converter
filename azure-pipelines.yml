@@ -9,76 +9,56 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-variables:
-  AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)  # AWS access key as secret
-  AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)  # AWS secret key as secret
-  AWS_REGION: "us-east-1a"  # AWS region
-  EC2_PUBLIC_IP: ""  # Will be set dynamically
-  SSH_USER: "ec2-user"  # Default user for Amazon Linux
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH private key as secret
+stages: 
 
-steps:
-  # Step 1: Checkout Repository from GitHub
-  - checkout: self
-    displayName: "Checkout Terraform Files from GitHub"
-
-  # Step 2: Debug Directory Structure
-  - script: |
-      echo "Current Working Directory: $(System.DefaultWorkingDirectory)"
-      ls -al
-    displayName: "Debug Directory Structure"
-
-  # Step 3: Initialize Terraform
-  - script: |
-      terraform init
-    workingDirectory: $(System.DefaultWorkingDirectory)
-    displayName: "Terraform Init"
-
-  # Step 4: Plan Terraform
-  - script: |
-      terraform plan -out=tfplan
-    workingDirectory: $(System.DefaultWorkingDirectory)
-    displayName: "Terraform Plan"
-
-  # Step 5: Apply Terraform and Set EC2 Public IP
-  - script: |
-      terraform apply -auto-approve tfplan
-      EC2_IP=$(terraform output -raw ec2_public_ip)
-      echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$EC2_IP"
-    workingDirectory: $(System.DefaultWorkingDirectory)
-    displayName: "Terraform Apply"
-
-
-  # Step 6: Verify EC2 Public IP
-  - script: |
-      echo "EC2 Public IP: $(EC2_PUBLIC_IP)"
-      displayName: "Display EC2 Public IP"
-
-
-  # Step 6: Install SSH Key
-  - script: |
-      mkdir -p ~/.ssh
-      echo "$(SSH_PRIVATE_KEY)" > ~/.ssh/id_rsa
-      chmod 600 ~/.ssh/id_rsa
-      ssh -o StrictHostKeyChecking=no $(SSH_USER)@$(EC2_PUBLIC_IP) "echo Connection successful"
-    displayName: "Manually Configure SSH Key"
-
-  # Step 7: SSH into EC2 and Clone GitHub Repositories
-  - script: |
-      ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
-      sudo yum update -y
-      sudo yum install -y python3 git
-      git clone https://github.com/your-user/your-dash-app-repo.git /home/ec2-user/dash_app
-      git clone https://github.com/your-user/your-flask-api-repo.git /home/ec2-user/flask_api
-      EOF
-    displayName: "Clone Dash App and Flask API from GitHub"
-
-  # Step 8: Install Dependencies and Run Applications
-  - script: |
-      ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
-      pip3 install -r /home/ec2-user/dash_app/requirements.txt
-      pip3 install -r /home/ec2-user/flask_api/requirements.txt
-      nohup python3 /home/ec2-user/dash_app/app.py > /home/ec2-user/dash_app.log 2>&1 &
-      nohup python3 /home/ec2-user/flask_api/api.py > /home/ec2-user/flask_api.log 2>&1 &
-      EOF
-    displayName: "Install Dependencies and Start Applications"
+- stage: Provision
+  displayName: Provision EC2
+  jobs:
+    - job: Terraform
+      displayName: Provision EC2 using Terraform
+      pool:
+        vmImage: ubuntu-latest
+      steps:
+        - checkout: self
+        - task: TerraformCLI@2
+          inputs:
+            command: 'init'
+        - task: TerraformCLI@2
+          inputs:
+            command: 'validate'
+            additionalArguments: '-var "aws_access_key=$(AWS_ACCESS_KEY_ID)" ,-var "aws_secret_key=$(AWS_SECRET_ACCESS_KEY)" '
+            allowTelemetryCollection: true
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+        - task: TerraformCLI@2
+          inputs:
+            command: 'plan'
+            additionalArguments: '-var "aws_access_key=$(AWS_ACCESS_KEY_ID)" -var "aws_secret_key=$(AWS_SECRET_ACCESS_KEY)"'
+            allowTelemetryCollection: true
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+        - task: TerraformCLI@2
+          inputs:
+            command: 'apply'
+            additionalArguments: '-var "aws_access_key=$(AWS_ACCESS_KEY_ID)" -var "aws_secret_key=$(AWS_SECRET_ACCESS_KEY)"'
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+        - script: |
+            ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+            sudo yum update -y
+            sudo yum install -y python3 git
+            git clone https://github.com/your-user/your-dash-app-repo.git /home/ec2-user/dash_app
+            git clone https://github.com/your-user/your-flask-api-repo.git /home/ec2-user/flask_api
+            EOF
+          displayName: "Clone Dash App and Flask API from GitHub"
+        - script: |
+            ssh -o StrictHostKeyChecking=no -i $(SSH_PRIVATE_KEY) $(SSH_USER)@$(EC2_PUBLIC_IP) << 'EOF'
+            pip3 install -r /home/ec2-user/dash_app/requirements.txt
+            pip3 install -r /home/ec2-user/flask_api/requirements.txt
+            nohup python3 /home/ec2-user/dash_app/app.py > /home/ec2-user/dash_app.log 2>&1 &
+            nohup python3 /home/ec2-user/flask_api/api.py > /home/ec2-user/flask_api.log 2>&1 &
+            EOF
+          displayName: "Install Dependencies and Start Applications"
