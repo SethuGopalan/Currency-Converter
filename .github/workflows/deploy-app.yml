@@ -1,0 +1,80 @@
+name: Deploy Dash App and Flask API to EC2
+
+on:
+  push:
+    branches:
+      - master  # Trigger workflow on push to the `master` branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: "us-east-1"  # Change to your AWS region
+
+    steps:
+      # Step 1: Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set Up Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.6  # Replace with your desired Terraform version
+
+      # Step 3: Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Step 4: Plan Terraform
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ./terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Step 5: Apply Terraform
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Step 6: Retrieve EC2 Public IP
+      - name: Get EC2 Public IP
+        id: ec2_ip
+        run: |
+          echo "EC2_PUBLIC_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
+        working-directory: ./terraform
+
+      # Step 7: Configure SSH Key
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
+      # Step 8: SSH into EC2 and Deploy Application
+      - name: Deploy Application
+        run: |
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ env.EC2_PUBLIC_IP }} << 'EOF'
+          sudo yum update -y
+          sudo yum install -y python3 git
+          git clone https://github.com/<your-username>/<your-repo>.git ~/app
+          cd ~/app/dash_app
+          pip3 install -r requirements.txt
+          nohup python3 app.py > ~/dash_app.log 2>&1 &
+          cd ~/app/flask_api
+          pip3 install -r requirements.txt
+          nohup python3 api.py > ~/flask_api.log 2>&1 &
+          EOF
+        env:
+          EC2_PUBLIC_IP: ${{ env.EC2_PUBLIC_IP }}
