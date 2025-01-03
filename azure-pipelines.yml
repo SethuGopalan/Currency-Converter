@@ -16,8 +16,8 @@ variables:
 
 steps:
   # Step 1: Checkout Terraform Scripts from Azure Repos (Optional)
-  # - task: Checkout@1
-  #   displayName: "Checkout Terraform Scripts"
+  - task: Checkout@1
+    displayName: "Checkout Terraform Scripts"
 
   # Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
