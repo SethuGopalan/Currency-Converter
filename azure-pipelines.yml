@@ -12,7 +12,7 @@ pool:
 variables:
   AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)  # AWS access key as secret
   AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)  # AWS secret key as secret
-  AWS_REGION: "us-east-1"  # AWS region
+  AWS_REGION: "us-east-1a"  # AWS region
   EC2_PUBLIC_IP: ""  # Will be set dynamically
   SSH_USER: "ec2-user"  # Default user for Amazon Linux
   SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH private key as secret
