@@ -15,37 +15,39 @@ variables:
   SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH key stored as a secret variable
 
 steps:
-  # Step 1: Checkout Repository with Terraform Files
+  # Step 1: Checkout Terraform Scripts
   - checkout: self
-    fetchDepth: 1
-    displayName: "Checkout Repository"
-# Step 2: List Files in Working Directory (Debugging Step)
+    path: terraform
+
+  # Debugging: List files in the terraform directory
   - script: |
-      ls -al
-    displayName: "List Files in Working Directory"
+      ls -l terraform
+    displayName: "List Terraform Files"
+
+  # Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
       terraformVersion: 'latest'
 
-# Step 3: Initialize Terraform
+  # Step 3: Initialize Terraform
   - script: |
-      cd terraform
       terraform init
     displayName: "Terraform Init"
+    workingDirectory: $(System.DefaultWorkingDirectory)/terraform # Explicit working directory
 
   # Step 4: Plan Terraform
   - script: |
-      cd terraform
       terraform plan -out=tfplan
     displayName: "Terraform Plan"
+    workingDirectory: $(System.DefaultWorkingDirectory)/terraform # Explicit working directory
 
   # Step 5: Apply Terraform
   - script: |
-      cd terraform
       terraform apply -auto-approve tfplan
       EC2_IP=$(terraform output -raw ec2_public_ip)
       echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$EC2_IP"
     displayName: "Terraform Apply"
+    workingDirectory: $(System.DefaultWorkingDirectory)/terraform # Explicit working directory
 
   # Step 6: Install SSH Key
   - script: |
