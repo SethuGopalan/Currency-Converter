@@ -15,16 +15,17 @@ variables:
   SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH key stored as a secret variable
 
 steps:
-  # Step 1: Checkout Terraform Scripts from Azure Repos (Optional)
+  # Step 1: Checkout Repository with Terraform Files
   - task: Checkout@1
-    displayName: "Checkout Terraform Scripts"
-
-  # Step 2: Install Terraform
+    inputs:
+      fetchDepth: 1  # Fetch only the latest commit
+    displayName: "Checkout Repository"
+# Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
       terraformVersion: 'latest'
 
-  # Step 3: Initialize Terraform
+# Step 3: Initialize Terraform
   - script: |
       terraform init
     displayName: "Terraform Init"
