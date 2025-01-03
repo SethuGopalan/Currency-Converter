@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  EC2_PUBLIC_IP: ''
+  EC2_PUBLIC_IP: $(EC2_PUBLIC_IP)
   SSH_USER: 'ec2-user'  # Default Amazon Linux user
   SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH key stored as a secret variable
 
