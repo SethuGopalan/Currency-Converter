@@ -12,7 +12,7 @@ pool:
 variables:
   EC2_PUBLIC_IP: $(EC2_PUBLIC_IP)
   SSH_USER: 'ec2-user'  # Default Amazon Linux user
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH key stored as a secret variable
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH key stored as a secret variable
 
 steps:
   # Step 1: Checkout Terraform Scripts from Azure Repos (Optional)
@@ -45,7 +45,7 @@ steps:
   - task: InstallSSHKey@0
     inputs:
       
-      sshPublicKey: $(SSH_PRIVATE_KEY)
+      sshPublicKey: $(SSH_PRIVATE_KEY_Dev)
       hostName: $(EC2_PUBLIC_IP)
       userName: $(SSH_USER)
     displayName: "Install SSH Key"
