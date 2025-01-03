@@ -15,7 +15,7 @@ variables:
   AWS_REGION: "us-east-1"  # AWS region
   EC2_PUBLIC_IP: ""  # Will be set dynamically
   SSH_USER: "ec2-user"  # Default user for Amazon Linux
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH private key as secret
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)  # SSH private key as secret
 
 steps:
   # Step 1: Checkout Repository from GitHub
