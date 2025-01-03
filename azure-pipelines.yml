@@ -45,6 +45,8 @@ steps:
   - task: InstallSSHKey@0
     inputs:
       sshPublicKey: $(SSH_PRIVATE_KEY)
+      hostName: $(EC2_PUBLIC_IP)
+      userName: $(SSH_USER)
     displayName: "Install SSH Key"
 
   # Step 7: SSH into EC2 and Clone GitHub Repositories
