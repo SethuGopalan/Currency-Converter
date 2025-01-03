@@ -26,7 +26,7 @@ steps:
 
   # Step 3: List Files in Terraform Directory (Debugging Step)
   - script: |
-      cd terraform
+      
       echo "Inside Terraform Directory:"
       ls -al
     displayName: "List Files in Terraform Directory"
