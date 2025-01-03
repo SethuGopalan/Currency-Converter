@@ -15,24 +15,38 @@ variables:
   SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # Replace with actual variable name
 
 steps:
-  # Step 1: Install Terraform (Fully Qualified Name)
+  # Step 1: Checkout Terraform Scripts from Azure Repos
+  - task: Checkout@1
+    displayName: "Checkout Terraform Scripts"
+
+  # Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
      terraformVersion: 'latest'
-
+    
+  # Step 3: Initialize Terraform
   - script: |
       terraform init
-      terraform validate
-      terraform plan -out=tfplan
-      terraform apply -auto-approve tfplan
-    displayName: "Run Terraform Commands"
+    displayName: "Terraform Init"
 
-  # Step 6: Install SSH Key (Consider alternative to disabling StrictHostKeyChecking)
+  # Step 4: Plan Terraform
+  - script: |
+      terraform plan -out=tfplan
+    displayName: "Terraform Plan"
+
+  # Step 5: Apply Terraform
+  - script: |
+      terraform apply -auto-approve tfplan
+      echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$(terraform output -raw ec2_public_ip)"
+    displayName: "Terraform Apply"
+
+  # Step 6: Install SSH Key
   - task: InstallSSHKey@0
     inputs:
       sshPublicKey: $(SSH_PRIVATE_KEY)
       hostName: $(EC2_PUBLIC_IP)
       userName: $(SSH_USER)
+    displayName: "Install SSH Key"
 
   # Step 7: SSH into EC2 and Clone GitHub Repositories
   - script: |
