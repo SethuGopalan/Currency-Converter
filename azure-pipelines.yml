@@ -14,7 +14,7 @@ variables:
   AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)  # Set this as a secret variable
   AWS_REGION: "us-east-1"
   SSH_USER: "ec2-user"
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY_Dev)
 
 steps:
   # Step 1: Checkout Repository
