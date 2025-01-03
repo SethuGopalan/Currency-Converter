@@ -44,6 +44,7 @@ steps:
   # Step 6: Install SSH Key
   - task: InstallSSHKey@0
     inputs:
+      
       sshPublicKey: $(SSH_PRIVATE_KEY)
       hostName: $(EC2_PUBLIC_IP)
       userName: $(SSH_USER)
