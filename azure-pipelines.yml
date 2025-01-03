@@ -19,10 +19,17 @@ steps:
   - checkout: self
     path: terraform
 
-  # Debugging: List files in the terraform directory
   - script: |
-      ls -l terraform
-    displayName: "List Terraform Files"
+      echo "Current Working Directory: $(System.DefaultWorkingDirectory)"
+      ls -al
+    displayName: "List Files in Working Directory"
+
+  # Step 3: List Files in Terraform Directory (Debugging Step)
+  - script: |
+      cd terraform
+      echo "Inside Terraform Directory:"
+      ls -al
+    displayName: "List Files in Terraform Directory"
 
   # Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
