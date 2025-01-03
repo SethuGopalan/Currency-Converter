@@ -26,20 +26,18 @@ steps:
   - script: |
       echo "Current Working Directory: $(System.DefaultWorkingDirectory)"
       ls -al
-      cd terraform || exit 1
-      ls -al
     displayName: "Debug Directory Structure"
 
   # Step 3: Initialize Terraform
   - script: |
       terraform init
-    workingDirectory: $(System.DefaultWorkingDirectory)/terraform
+    workingDirectory: $(System.DefaultWorkingDirectory)
     displayName: "Terraform Init"
 
   # Step 4: Plan Terraform
   - script: |
       terraform plan -out=tfplan
-    workingDirectory: $(System.DefaultWorkingDirectory)/terraform
+    workingDirectory: $(System.DefaultWorkingDirectory)
     displayName: "Terraform Plan"
 
   # Step 5: Apply Terraform and Set EC2 Public IP
@@ -47,7 +45,7 @@ steps:
       terraform apply -auto-approve tfplan
       EC2_IP=$(terraform output -raw ec2_public_ip)
       echo "##vso[task.setvariable variable=EC2_PUBLIC_IP]$EC2_IP"
-    workingDirectory: $(System.DefaultWorkingDirectory)/terraform
+    workingDirectory: $(System.DefaultWorkingDirectory)
     displayName: "Terraform Apply"
 
 
