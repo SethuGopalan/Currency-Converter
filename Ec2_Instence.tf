@@ -1,5 +1,7 @@
 # Specify the provider
-
+provider "aws" {
+  region = "us-east-1"
+}
 
 # Import IAM Instance Profile from the IAM Script
 # data "aws_iam_instance_profile" "ec2_instance_profile" {
