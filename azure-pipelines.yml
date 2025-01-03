@@ -16,11 +16,9 @@ variables:
 
 steps:
   # Step 1: Checkout Repository with Terraform Files
-  - task: Checkout@1
-    inputs:
-      fetchDepth: 1  # Fetch only the latest commit
+  - checkout: self
+    fetchDepth: 1
     displayName: "Checkout Repository"
-# Step 2: Install Terraform
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
       terraformVersion: 'latest'
