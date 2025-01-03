@@ -11,18 +11,17 @@ pool:
 
 variables:
   SSH_USER: 'ec2-user'  # Default Amazon Linux user
-  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH key stored as a secret variable in Azure Pipelines
+  SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)  # SSH key stored as a secret variable
 
 steps:
-  # Step 1: Checkout Terraform Scripts from Azure Repos
-  - task: Checkout@1
-    displayName: "Checkout Terraform Scripts"
+  # Step 1: Checkout Terraform Scripts from Azure Repos (Optional)
+  # - task: Checkout@1
+  #   displayName: "Checkout Terraform Scripts"
 
   # Step 2: Install Terraform
-
   - task: JasonBJohnson.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@2
     inputs:
-     terraformVersion: 'latest'
+      terraformVersion: 'latest'
 
   # Step 3: Initialize Terraform
   - script: |
