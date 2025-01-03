@@ -1,7 +1,7 @@
 # Specify the provider
 provider "aws" {
   region  = "us-east-1" # Change to your preferred region
-  profile = "Terra-Dev"
+  
 }
 
 # Import IAM Instance Profile from the IAM Script
