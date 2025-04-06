@@ -55,9 +55,9 @@ resource "aws_security_group" "ec2_security_group" {
 
 # Create an EC2 Instance
 resource "aws_instance" "web_server" {
-  ami           = "ami-0c02fb55956c7d316" # Replace with your preferred AMI ID
+  ami           = "ami-0c02fb55956c7d316" 
   instance_type = "t2.micro"
-  key_name      = "Dev-Ops" # Replace with your key pair name
+  key_name      = "Dev-Ops" 
   security_groups = [
     aws_security_group.ec2_security_group.name
   ]
