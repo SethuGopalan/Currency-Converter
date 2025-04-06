@@ -20,7 +20,7 @@ provider "aws" {
 }
 # Import IAM Instance Profile from the IAM Script
 # data "aws_iam_instance_profile" "ec2_instance_profile" {
-#   name = "ec2-instance-profile" # This must match the IAM profile name in iam.tf
+#   name = "ec2-instance-profile" 
 # }
 
 # Create a Security Group for EC2
